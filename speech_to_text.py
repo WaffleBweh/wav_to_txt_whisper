@@ -2,6 +2,7 @@ import torch
 import torchaudio
 import numpy as np
 import sys
+from datetime import timedelta
 from tqdm import tqdm
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
@@ -30,6 +31,7 @@ pipe = pipeline(
     feature_extractor=processor.feature_extractor,
     tokenizer=processor.tokenizer,
     torch_dtype=torch_dtype,
+    return_timestamps=True,
     device=device,
     generate_kwargs={"max_new_tokens": 128},
 )
@@ -77,6 +79,7 @@ audio_chunks = split_audio(waveform, chunk_length_s, sample_rate)
 
 # Process each chunk and combine the results with a progress bar
 final_transcription = []
+idx = 0
 for chunk in tqdm(audio_chunks, desc="Processing audio chunks", unit="chunk"):
     # Convert waveform to numpy array and prepare dictionary input
     audio_input = {
@@ -85,14 +88,24 @@ for chunk in tqdm(audio_chunks, desc="Processing audio chunks", unit="chunk"):
     }
 
     # Run pipeline for the chunk
-    result = pipe(audio_input)
-    final_transcription.append(result["text"])
+    results = pipe(audio_input)
+
+    for entry in results['chunks']:
+        print(entry)
+
+        startTime = str(0)+str(timedelta(seconds=int(entry['timestamp'][0])))+',000'
+        endTime = str(0)+str(timedelta(seconds=int(entry['timestamp'][1])))+',000'
+        text = entry['text']
+        idx += 1
+        out_str = f"{idx}\n{startTime} --> {endTime}\n{text[1:] if text[0] == ' ' else text}\n\n"
+
+        final_transcription.append(out_str)
 
 # Combine all chunk transcriptions into one
 combined_transcription = " ".join(final_transcription)
 
 # Output transcription to a text file
-output_file_path = "transcription_output.txt"
+output_file_path = audio_file_path+".srt"
 with open(output_file_path, "w", encoding="utf-8") as f:
     f.write(combined_transcription)
 

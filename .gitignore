@@ -3,6 +3,10 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.txt
+!requirements.txt
+*.srt
+*.wav
 
 # Virtual environment
 ai_env/

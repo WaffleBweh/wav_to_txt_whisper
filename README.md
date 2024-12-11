@@ -1,3 +1,6 @@
+# WAV To TEXT
+Experimenting with a french fine tuned model of whisper to perform transcription work on large .wav files.
+
 # Install
 
 ## Clone the repository:
