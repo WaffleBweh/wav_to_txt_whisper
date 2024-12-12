@@ -89,23 +89,13 @@ for chunk in tqdm(audio_chunks, desc="Processing audio chunks", unit="chunk"):
 
     # Run pipeline for the chunk
     results = pipe(audio_input)
-
-    for entry in results['chunks']:
-        print(entry)
-
-        startTime = str(0)+str(timedelta(seconds=int(entry['timestamp'][0])))+',000'
-        endTime = str(0)+str(timedelta(seconds=int(entry['timestamp'][1])))+',000'
-        text = entry['text']
-        idx += 1
-        out_str = f"{idx}\n{startTime} --> {endTime}\n{text[1:] if text[0] == ' ' else text}\n\n"
-
-        final_transcription.append(out_str)
+    final_transcription.append(results["text"])
 
 # Combine all chunk transcriptions into one
 combined_transcription = " ".join(final_transcription)
 
 # Output transcription to a text file
-output_file_path = audio_file_path+".srt"
+output_file_path = audio_file_path+".txt"
 with open(output_file_path, "w", encoding="utf-8") as f:
     f.write(combined_transcription)
 
